@@ -1,4 +1,5 @@
 ﻿using System;
+using Project.Data;
 using UnityEngine;
 
 namespace Project.Core
@@ -13,6 +14,9 @@ namespace Project.Core
 
     public sealed class GameStateManager : MonoBehaviour
     {
+        [Header("Config")]
+        [SerializeField] private StageConfig stageConfig;
+
         [Header("Run")]
         [SerializeField] private float moveSpeed = 6f;
         [SerializeField] private float stageLength = 100f;
@@ -36,17 +40,11 @@ namespace Project.Core
 
         private float _nextWaveDistance;
         private bool _bossTriggered;
+        private bool _initialized;
 
         private void Start()
         {
-            Stage = startingStage;
-            Gold = Mathf.Max(0, startingGold);
-
-            StageChanged?.Invoke(Stage);
-            GoldChanged?.Invoke(Gold);
-
-            ResetStageProgress();
-            ChangeState(GameState.Run);
+            InitializeIfNeeded();
         }
 
         private void Update()
@@ -108,10 +106,46 @@ namespace Project.Core
             return true;
         }
 
+        public void OverrideStartingProgress(int stage, int gold)
+        {
+            startingStage = Mathf.Max(1, stage);
+            startingGold = Mathf.Max(0, gold);
+
+            if (!_initialized)
+            {
+                return;
+            }
+
+            Stage = startingStage;
+            Gold = startingGold;
+            StageChanged?.Invoke(Stage);
+            GoldChanged?.Invoke(Gold);
+            ResetStageProgress();
+            ChangeState(GameState.Run);
+        }
+
+        private void InitializeIfNeeded()
+        {
+            if (_initialized)
+            {
+                return;
+            }
+
+            _initialized = true;
+            Stage = Mathf.Max(1, startingStage);
+            Gold = Mathf.Max(0, startingGold);
+
+            StageChanged?.Invoke(Stage);
+            GoldChanged?.Invoke(Gold);
+
+            ResetStageProgress();
+            ChangeState(GameState.Run);
+        }
+
         private void AdvanceRun()
         {
-            var safeStageLength = Mathf.Max(0.01f, stageLength);
-            var safeSpawnInterval = Mathf.Max(0.1f, spawnInterval);
+            var safeStageLength = GetStageLength();
+            var safeSpawnInterval = GetSpawnInterval();
 
             Distance += moveSpeed * Time.deltaTime;
             var normalizedDistance = Mathf.Clamp01(Distance / safeStageLength);
@@ -149,9 +183,29 @@ namespace Project.Core
         private void ResetStageProgress()
         {
             Distance = 0f;
-            _nextWaveDistance = Mathf.Max(0.1f, spawnInterval);
+            _nextWaveDistance = GetSpawnInterval();
             _bossTriggered = false;
             DistanceChanged?.Invoke(Distance, 0f);
+        }
+
+        private float GetStageLength()
+        {
+            if (stageConfig != null)
+            {
+                return stageConfig.StageLength;
+            }
+
+            return Mathf.Max(0.01f, stageLength);
+        }
+
+        private float GetSpawnInterval()
+        {
+            if (stageConfig != null)
+            {
+                return stageConfig.SpawnInterval;
+            }
+
+            return Mathf.Max(0.1f, spawnInterval);
         }
 
         private void ChangeState(GameState nextState)

@@ -11,11 +11,13 @@ namespace Project.Systems
         [SerializeField] private bool destroyOnDeath = true;
 
         public event Action<EnemyHealth> Died;
+        public event Action<EnemyHealth, int, bool> Damaged;
 
         public int MaxHp { get; private set; }
         public int CurrentHp { get; private set; }
         public int GoldReward => goldReward;
         public bool IsDead { get; private set; }
+        public bool CanBeTargeted { get; private set; } = true;
 
         private void Awake()
         {
@@ -38,6 +40,7 @@ namespace Project.Systems
             CurrentHp = MaxHp;
             goldReward = Mathf.Max(0, reward);
             IsDead = false;
+            CanBeTargeted = true;
         }
 
         public void ResetStats()
@@ -45,9 +48,21 @@ namespace Project.Systems
             MaxHp = Mathf.Max(1, maxHp);
             CurrentHp = MaxHp;
             IsDead = false;
+            CanBeTargeted = true;
         }
 
-        public bool TakeDamage(int damage)
+        public void SetTargetable(bool targetable)
+        {
+            if (IsDead)
+            {
+                CanBeTargeted = false;
+                return;
+            }
+
+            CanBeTargeted = targetable;
+        }
+
+        public bool TakeDamage(int damage, bool isCritical = false)
         {
             if (IsDead || damage <= 0)
             {
@@ -55,6 +70,7 @@ namespace Project.Systems
             }
 
             CurrentHp = Mathf.Max(0, CurrentHp - damage);
+            Damaged?.Invoke(this, damage, isCritical);
             if (CurrentHp > 0)
             {
                 return true;

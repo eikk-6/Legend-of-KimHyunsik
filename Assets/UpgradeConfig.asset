@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4179b51e98e3814395be444d29b58f0, type: 3}
+  m_Name: UpgradeConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Project.Data.UpgradeConfig
+  costGrowth: 1.15
+  attackBaseCost: 20
+  attackSpeedBaseCost: 20
+  critChanceBaseCost: 25
+  baseAttack: 5
+  baseAttackSpeed: 1
+  baseCritChance: 0
+  critMultiplier: 2
+  attackPerLevel: 1
+  attackSpeedPerLevel: 0.1
+  critChancePerLevel: 0.01
+  critChanceCap: 0.75

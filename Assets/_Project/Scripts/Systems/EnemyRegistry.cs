@@ -35,7 +35,7 @@ namespace Project.Systems
 
             foreach (var enemy in Enemies)
             {
-                if (enemy == null || enemy.IsDead)
+                if (enemy == null || enemy.IsDead || !enemy.CanBeTargeted)
                 {
                     continue;
                 }
